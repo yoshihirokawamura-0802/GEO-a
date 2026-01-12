@@ -7,33 +7,28 @@
       font-family: Arial, sans-serif;
       padding: 20px;
     }
-
     input, button {
       padding: 6px;
       margin-right: 6px;
     }
-
     table {
       border-collapse: collapse;
       margin-top: 20px;
       width: 100%;
       font-size: 13px;
     }
-
     th, td {
       border: 1px solid #ccc;
       padding: 6px;
       vertical-align: top;
       word-break: break-word;
     }
-
     th {
       background: #f0f0f0;
       text-align: center;
     }
-
     td {
-      max-width: 200px;
+      max-width: 220px;
     }
   </style>
 </head>
@@ -76,6 +71,10 @@ function search() {
 
   google.script.run
     .withSuccessHandler(showResult)
+    .withFailureHandler(err => {
+      alert("取得に失敗しました");
+      console.error(err);
+    })
     .fetchGSE(gse);
 }
 
@@ -99,8 +98,8 @@ function showResult(data) {
     <td><a href="${data.url}" target="_blank">${data.url}</a></td>
     <td>-</td>
   `;
-  tbody.appendChild(tr);
 
+  tbody.appendChild(tr);
   document.getElementById("resultTable").style.display = "table";
   document.getElementById("saveBtn").style.display = "inline-block";
 }
@@ -108,9 +107,15 @@ function showResult(data) {
 function save() {
   if (!currentData) return;
 
-  google.script.run.withSuccessHandler(() => {
-    alert("スプレッドシートに保存しました");
-  }).saveGSE(currentData);
+  google.script.run
+    .withSuccessHandler(() => {
+      alert("スプレッドシートに保存しました");
+    })
+    .withFailureHandler(err => {
+      alert("保存に失敗しました");
+      console.error(err);
+    })
+    .saveGSE(currentData);
 }
 </script>
 
