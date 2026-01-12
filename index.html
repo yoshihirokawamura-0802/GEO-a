@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    input, button {
+      padding: 6px;
+      margin-right: 6px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+      width: 100%;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    th {
+      background: #f0f0f0;
+      text-align: center;
+    }
+
+    td {
+      max-width: 200px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>GEO GSE Dataset 検索</h2>
+
+<input type="text" id="gseInput" placeholder="GSE116294">
+<button onclick="search()">検索</button>
+<button id="saveBtn" onclick="save()" style="display:none;">保存</button>
+
+<table id="resultTable" style="display:none;">
+  <thead>
+    <tr>
+      <th>GSE number</th>
+      <th>Status</th>
+      <th>Title</th>
+      <th>Organism</th>
+      <th>Experiment Type</th>
+      <th>Summary</th>
+      <th>Overall design</th>
+      <th>Contributor(s)</th>
+      <th>Citation</th>
+      <th>URL</th>
+      <th>saved date</th>
+    </tr>
+  </thead>
+  <tbody id="resultBody"></tbody>
+</table>
+
+<script>
+let currentData = null;
+
+function search() {
+  const gse = document.getElementById("gseInput").value.trim();
+  if (!gse) {
+    alert("GSE番号を入力してください");
+    return;
+  }
+
+  google.script.run
+    .withSuccessHandler(showResult)
+    .fetchGSE(gse);
+}
+
+function showResult(data) {
+  currentData = data;
+
+  const tbody = document.getElementById("resultBody");
+  tbody.innerHTML = "";
+
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${data.gse}</td>
+    <td>${data.status}</td>
+    <td>${data.title}</td>
+    <td>${data.organism}</td>
+    <td>${data.type}</td>
+    <td>${data.summary}</td>
+    <td>${data.design}</td>
+    <td>${data.contributor}</td>
+    <td>${data.citation}</td>
+    <td><a href="${data.url}" target="_blank">${data.url}</a></td>
+    <td>-</td>
+  `;
+  tbody.appendChild(tr);
+
+  document.getElementById("resultTable").style.display = "table";
+  document.getElementById("saveBtn").style.display = "inline-block";
+}
+
+function save() {
+  if (!currentData) return;
+
+  google.script.run.withSuccessHandler(() => {
+    alert("スプレッドシートに保存しました");
+  }).saveGSE(currentData);
+}
+</script>
+
+</body>
+</html>
